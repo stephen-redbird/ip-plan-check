@@ -19,3 +19,12 @@ jobs:
         id: check 
         shell: bash 
         run: docker run --rm ipcheck | tee report.txt 
+
+      - name: Open an issue with the report 
+        if: failure() && steps.check.outcome == 'failure' 
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        run: | 
+          docker run --rm -e GITHUB_TOKEN -e GITHUB_REPOSITORY \ 
+            -v "$PWD/report.txt:/app/report.txt" \ 
+            ipcheck python report_issue.py 
